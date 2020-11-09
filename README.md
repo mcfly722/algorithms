@@ -1,2 +1,2 @@
-# binFact
-Binary Reverse Factorization
+# Binary Reverse Factorization
+
