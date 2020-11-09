@@ -1,2 +1,2 @@
-# Binary Reverse Factorization
+# Algorithms
 
