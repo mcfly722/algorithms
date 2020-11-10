@@ -11,10 +11,46 @@ func binArr2BInt(arr []byte) *big.Int {
 		r.Mul(r,big.NewInt(2))
 		r.Add(r,big.NewInt((int64)(arr[i])))
 	}
-	
 	return r
 }
 
+const calculationBitsLimit = 3
+
+func isCorrectTail(counter []byte) bool {
+	fmt.Println(counter);
+	if (len(counter) < calculationBitsLimit) {
+		return true;
+	}
+	return false;
+}
+
+func binarySearch(filter func (counter []byte) bool ){
+	counter := []byte{0}
+	
+	notFinished: for {
+		isCorrect := filter(counter)
+
+		if (isCorrect) {  			// correct, move to next register
+			counter = append(counter,0)
+		} else {					// incorrect, increment last one or return to previous register
+
+			nextOne: for {
+				item := counter[len(counter)-1]
+				
+				if (item == 3) {
+					counter=counter[:len(counter)-1] // remove last one
+				} else {
+					item++
+					counter[len(counter)-1] = item
+					break nextOne
+				}
+
+				if (len(counter)==0) { break notFinished;}
+			}
+		}
+		if (len(counter) == 0) {break}
+	}
+}
 
 func main() {
 	var x, _ = new(big.Int).SetString("173", 10)
@@ -26,14 +62,16 @@ func main() {
 	fmt.Println(fmt.Sprintf("product:%b=%v", p,p));
 	fmt.Println("-----------------------------------");
 	
-	a := []byte{1,0,1,0,0,1}
-	b := []byte{0,0,1,1,1,1}
-
-	aa := binArr2BInt(a)
-	bb := binArr2BInt(b)
+	binarySearch(isCorrectTail);
 	
-	fmt.Println(fmt.Sprintf("a      :%b=%v", aa,aa));
-	fmt.Println(fmt.Sprintf("b      :%b=%v", bb,bb));
+	
+
+
+	//aa := binArr2BInt(a)
+	//bb := binArr2BInt(b)
+	
+	//fmt.Println(fmt.Sprintf("a      :%b=%v", aa,aa));
+	//fmt.Println(fmt.Sprintf("b      :%b=%v", bb,bb));
 
 	
 			
