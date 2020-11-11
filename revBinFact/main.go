@@ -14,21 +14,31 @@ func binArr2BInt(arr []byte) *big.Int {
 	return r
 }
 
-const calculationBitsLimit = 3
+const calculationBitsLimit = 4
 
-func isCorrectTail(counter []byte) bool {
-	fmt.Println(counter);
-	if (len(counter) < calculationBitsLimit) {
+func isCorrectTail(first []byte, second []byte) bool {
+	fmt.Print(first);
+	fmt.Print(",");
+	fmt.Println(second);
+	if (len(first) < calculationBitsLimit) {
 		return true;
 	}
 	return false;
 }
 
-func binarySearch(filter func (counter []byte) bool ){
+func binarySearch(filter func (first []byte, second []byte) bool ){
 	counter := []byte{0}
 	
 	notFinished: for {
-		isCorrect := filter(counter)
+		first:=[]byte{};
+		second :=[]byte{};
+
+		for _, value :=range counter {
+			first = append(first,value & 1)
+			second = append(second,(value/2) & 1)
+		}
+		
+		isCorrect := filter(first, second)
 
 		if (isCorrect) {  			// correct, move to next register
 			counter = append(counter,0)
