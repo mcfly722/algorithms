@@ -5,7 +5,7 @@ import (
 	"math/big"
 )
 
-const searchDepthBits = 3
+const searchDepthBits = 8
 
 func bin2str(s []byte) string {
 	r := ""
@@ -24,6 +24,17 @@ func binArr2BInt(arr []byte) *big.Int {
 	return r
 }
 
+func BInt2binArr(number *big.Int,l int) []byte {
+	r := []byte{}
+	current := new(big.Int).Set(number)
+	
+	for i:=0;i<l;i++{
+		_,m :=current.DivMod(current,big.NewInt(2),big.NewInt(2))
+		r = append(r,(uint8)(m.Int64()))
+	}
+
+	return r
+}
 
 func bitMask(length int) *big.Int {
 	r := big.NewInt(0)
@@ -112,11 +123,12 @@ func equation_3 (first []byte, second []byte) bool {
 	aa := new(big.Int).Set(a)
 	aa = aa.Mul(aa,a)
 
+	sum :=aa.Add(aa,p)
+
 	bb := new(big.Int).Set(b)
 	bb = bb.Mul(bb,b)
-	
-	sum :=aa.Add(aa,p)
-	
+
+	//fmt.Println(fmt.Sprintf("%v, %v",bin2str(first),bin2str(second)));
 	return sum.Cmp(bb) == 0
 }
 
@@ -226,14 +238,16 @@ func bfs(filter func (first []byte, second []byte) (bool,bool),showSolution func
 				second = second.Mul(second,big.NewInt(int64(bit2)))
 				second.Add(second, p.second)
 
-
-
 				newLayer = append(newLayer, pair {
 					first: first,
 					second: second})
 
+				found := equation_3(BInt2binArr(first,n+1), BInt2binArr(second,n+1))
+				
+				if found {
+					fmt.Println(fmt.Sprintf("%v,%v",first,second));
+				}
 
-				fmt.Println(fmt.Sprintf("%10b,%10b",first,second));
 			} 
 		}
 		
