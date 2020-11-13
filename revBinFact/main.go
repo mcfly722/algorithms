@@ -211,6 +211,61 @@ type pair struct {
 	second *big.Int
 }
 
+func equation_4 (first []byte, second []byte) bool {
+	a := binArr2BInt(first)
+	d := binArr2BInt(second)
+
+	aa := new(big.Int).Set(a)
+	aa = aa.Mul(aa,a)
+
+	sum :=aa.Add(aa,p)
+	
+	d_a := d.Add(d,a)
+	d_ad_a := d_a.Mul(d_a,d_a)
+	
+	return sum.Cmp(d_ad_a) == 0
+}
+
+func equation_5 (first []byte, second []byte) bool {
+	a := binArr2BInt(first)
+	d := binArr2BInt(second)
+
+	aa := new(big.Int).Set(a)
+	aa = aa.Mul(aa,a)
+
+	sum :=aa.Add(aa,p)
+	
+	d_a := d.Add(d,a)
+	d_ad_a := d_a.Mul(d_a,d_a)	
+	
+	mask := bitMask(len(first))
+	
+	sum_f := new(big.Int).Set(sum).And(mask,sum)
+	d_ad_a_f := new(big.Int).Set(d_ad_a).And(mask,d_ad_a)
+	
+	return sum_f.Cmp(d_ad_a_f) == 0
+}
+
+func equation_6 (first []byte, second []byte) bool {
+	a := binArr2BInt(first)
+	d := binArr2BInt(second)
+
+	a_a := new(big.Int).Set(a)
+	a_a = a_a.Add(a_a,a_a)
+	a_a_d := a_a.Add(a_a,d)
+	
+	a_a_dd := a_a_d.Mul(a_a_d,d)
+
+	mask := bitMask(len(first))
+	
+	a_a_dd_f := new(big.Int).Set(a_a_dd).And(mask,a_a_dd)
+	p_f := new(big.Int).Set(p).And(mask,p)
+	
+	return a_a_dd_f.Cmp(p_f) == 0
+}
+
+
+
 func bfs(filter func (first []byte, second []byte) (bool,bool),showSolution func (n1 *big.Int, n2 *big.Int)) {
 	
 	layer := []pair{
@@ -220,9 +275,10 @@ func bfs(filter func (first []byte, second []byte) (bool,bool),showSolution func
 	}
 	
 	for n:=0;n<searchDepthBits;n++ {
-		fmt.Println(fmt.Sprintf("LAYER %v", n));
 
 		var newLayer = []pair{};
+
+		fmt.Println(fmt.Sprintf("LAYER %v", n))		
 		
 		for _,p := range layer {
 
@@ -238,18 +294,30 @@ func bfs(filter func (first []byte, second []byte) (bool,bool),showSolution func
 				second = second.Mul(second,big.NewInt(int64(bit2)))
 				second.Add(second, p.second)
 
-				newLayer = append(newLayer, pair {
-					first: first,
-					second: second})
+				f := BInt2binArr(first,n+1)
+				s := BInt2binArr(second,n+1)
 
-				found := equation_3(BInt2binArr(first,n+1), BInt2binArr(second,n+1))
+				if equation_5(f, s) && equation_6(f, s){
+					
+					newLayer = append(newLayer, pair {
+						first: first,
+						second: second})
+						
+					//fmt.Println(fmt.Sprintf("%v, %v",bin2str(f),bin2str(s)));
+						
+				}
+				
+
+				found := equation_4(f, s)
 				
 				if found {
-					fmt.Println(fmt.Sprintf("%v,%v",first,second));
+					fmt.Println(fmt.Sprintf("SOLUTION ---------------------------   %v[%b],  %v[%b]",first,first,second,second));
 				}
 
 			} 
 		}
+
+		fmt.Println(fmt.Sprintf("            COUNT: %v",len(newLayer)))
 		
 		layer = newLayer;
 	}
@@ -268,7 +336,7 @@ func main() {
 	b := new(big.Int).Set(x).Add(x,y)
 	b = b.Div(b,big.NewInt(2))
 	
-	
+	d := new(big.Int).Set(b).Sub(b,a)
 	
 	fmt.Println(fmt.Sprintf("x  :%32b=[%10X]=%v", x,x,x));
 	fmt.Println(fmt.Sprintf("y  :%32b=[%10X]=%v", y,y,y));
@@ -277,6 +345,8 @@ func main() {
 
 	fmt.Println(fmt.Sprintf("a  :%32b=[%10X]=%v", a,a,a));
 	fmt.Println(fmt.Sprintf("b  :%32b=[%10X]=%v", b,b,b));
+	fmt.Println(fmt.Sprintf("d  :%32b=[%10X]=%v", d,d,d));
+	
 	
 	
 	fmt.Println("-----------------------------------");
