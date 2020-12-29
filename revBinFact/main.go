@@ -45,6 +45,7 @@ func bitMask(length int) *big.Int {
 	return r;
 }
 
+/*
 func equation_1 (first []byte, second []byte) bool {
 	a := binArr2BInt(first)
 	b := binArr2BInt(second)
@@ -115,7 +116,8 @@ func equation_2 (first []byte, second []byte) bool {
 		
 	return areEqual
 }
-
+*/
+/*
 func equation_3 (first []byte, second []byte) bool {
 	a := binArr2BInt(first)
 	b := binArr2BInt(second)
@@ -132,33 +134,10 @@ func equation_3 (first []byte, second []byte) bool {
 	return sum.Cmp(bb) == 0
 }
 
-func showSolution(n1 *big.Int, n2 *big.Int) {
-	fmt.Println(fmt.Sprintf("\nSOLUTION:%v,%v",n1,n2));
-}
-
-func isCorrectEquationSystem(first []byte, second []byte) (bool, bool) {
-	
-	if (len(first) > searchDepthBits){
-		return false, false;
-	}
-
-	eq_1 := equation_1(first, second)
-	eq_2 := equation_2(first, second)
-	
-	if eq_1 && eq_2 {
-
-		equal := equation_3(first,second)
-		if equal {
-			return true, true;
-		
-		}
-		
-		return false, true;
-	}
-	return false, false;
-}
+*/
 
 
+/*
 func dfs(filter func (first []byte, second []byte) (bool,bool),showSolution func (n1 *big.Int, n2 *big.Int)) {
 	
 	counter := []byte{0}
@@ -205,12 +184,9 @@ func dfs(filter func (first []byte, second []byte) (bool,bool),showSolution func
 	}
 }
 
+*/
 
-type pair struct {
-	first *big.Int
-	second *big.Int
-}
-
+/*
 func equation_4 (first []byte, second []byte) bool {
 	a := binArr2BInt(first)
 	d := binArr2BInt(second)
@@ -246,27 +222,118 @@ func equation_5 (first []byte, second []byte) bool {
 	return sum_f.Cmp(d_ad_a_f) == 0
 }
 
-func equation_6 (first []byte, second []byte) bool {
-	a := binArr2BInt(first)
-	d := binArr2BInt(second)
+*/
 
-	a_a := new(big.Int).Set(a)
-	a_a = a_a.Add(a_a,a_a)
-	a_a_d := a_a.Add(a_a,d)
-	
-	a_a_dd := a_a_d.Mul(a_a_d,d)
 
-	mask := bitMask(len(first))
+
+
+
+// p?=m^2-n^2
+func equation_solution_check (p *big.Int, m_ []byte, n_ []byte) bool {
+	m := binArr2BInt(m_)
+	n := binArr2BInt(n_)
+
+	mm := m.Mul(m,m)
+	nn := n.Mul(n,n)
+	nn_p := nn.Add(nn,p)
 	
-	a_a_dd_f := new(big.Int).Set(a_a_dd).And(mask,a_a_dd)
-	p_f := new(big.Int).Set(p).And(mask,p)
+	return nn_p.Cmp(mm) == 0
+}
+
+// (p + n^2) && mask =m^2 && mask
+func equation_1 (p *big.Int, m_ []byte, n_ []byte) bool {
+	m := binArr2BInt(m_)
+	n := binArr2BInt(n_)
+
+	mm := new(big.Int).Mul(m,m)
+	nn := new(big.Int).Mul(n,n)
+
+	p_nn := new(big.Int).Add(p, nn)
 	
-	return a_a_dd_f.Cmp(p_f) == 0
+	mask := bitMask(len(m_))
+
+	p_nn_m := new(big.Int).And(mask,p_nn)
+	mm_m :=new(big.Int).And(mask,mm)
+
+	if binArr2BInt(m_).Cmp(big.NewInt(57))==0 && binArr2BInt(n_).Cmp(big.NewInt(244))==0 {
+		fmt.Println(fmt.Sprintf("m      =%3b n   =%3b", m,n));
+		fmt.Println(fmt.Sprintf("mm     =%3b nn  =%3b", mm,nn));
+		fmt.Println(fmt.Sprintf("p_nn   =%3b", p_nn));
+		fmt.Println(fmt.Sprintf("mask   =%3b", mask));
+		fmt.Println(fmt.Sprintf("p_nn_m =%3b", p_nn_m));
+		fmt.Println(fmt.Sprintf("mm_m   =%3b", mm_m));
+	}
+
+	return p_nn_m.Cmp(mm_m) == 0
+}
+
+//  (p ^2+4*m^2*n^2) && mask=(m^2+n^2)^2 && mask
+func equation_2 (p *big.Int, m_ []byte, n_ []byte) bool {
+	m := binArr2BInt(m_)
+	n := binArr2BInt(n_)
+
+	mm := new(big.Int).Mul(m,m)
+	nn := new(big.Int).Mul(n,n)
+
+	mmnn := new(big.Int).Mul(mm,nn)
+	mmnn4:= new(big.Int).Mul(mmnn,big.NewInt(4))
+
+	pp := new(big.Int).Mul(p,p)
+	pp_mmnn4 :=new(big.Int).Add(pp, mmnn4)
+
+	mask := bitMask(len(m_))
+	pp_mmnn4_m := new(big.Int).And(mask,pp_mmnn4)
+	
+	mm_nn :=new(big.Int).Add(mm,nn)
+	mm_nnmm_nn :=new(big.Int).Mul(mm_nn,mm_nn)
+	mm_nnmm_nn_m :=new(big.Int).And(mask,mm_nnmm_nn)
+
+
+	if binArr2BInt(m_).Cmp(big.NewInt(57))==0 && binArr2BInt(n_).Cmp(big.NewInt(244))==0 {
+		fmt.Println(fmt.Sprintf("m           =%3b n =%3b", m,n));
+		fmt.Println(fmt.Sprintf("mm          =%3b nn=%3b", mm,nn));
+		fmt.Println(fmt.Sprintf("mmnn        =%3b", mmnn));
+		fmt.Println(fmt.Sprintf("mmnn4       =%3b", mmnn4));
+		fmt.Println(fmt.Sprintf("pp          =%3b", pp));
+		fmt.Println(fmt.Sprintf("pp_mmnn4    =%3b", pp_mmnn4));
+		fmt.Println(fmt.Sprintf("mask        =%3b", mask));
+		fmt.Println(fmt.Sprintf("pp_mmnn4_m  =%3b", pp_mmnn4_m));
+		fmt.Println(fmt.Sprintf("mm_nn       =%3b", mm_nn));
+		fmt.Println(fmt.Sprintf("mm_nnmm_nn  =%3b", mm_nnmm_nn));
+		fmt.Println(fmt.Sprintf("mm_nnmm_nn_m=%3b", mm_nnmm_nn_m));
+	}
+	
+	return pp_mmnn4_m.Cmp(mm_nnmm_nn_m) == 0
 }
 
 
 
-func bfs(filter func (first []byte, second []byte) (bool,bool),showSolution func (n1 *big.Int, n2 *big.Int)) {
+func isCorrectEquationSystem(p *big.Int, first []byte, second []byte) (bool, bool) {
+	
+	if (len(first) > searchDepthBits){
+		return false, false;
+	}
+
+	eq_1 := equation_1(p, first, second)
+	eq_2 := equation_2(p, first, second)
+
+	fmt.Println(fmt.Sprintf("%s %s %5t %5t", bin2str(first),bin2str(second), eq_1, eq_2));
+//	fmt.Println("-----------------------------------------------------------------")
+	
+	
+	if eq_1 && eq_2 {
+		return equation_solution_check(p, first,second), true;
+	}
+	return false, false;
+}
+
+
+type pair struct {
+	first *big.Int
+	second *big.Int
+}
+
+func bfs(p *big.Int, filter func (p *big.Int, first []byte, second []byte) (bool,bool), showSolution func (n1 *big.Int, n2 *big.Int)) {
 	
 	layer := []pair{
 		pair{
@@ -274,13 +341,13 @@ func bfs(filter func (first []byte, second []byte) (bool,bool),showSolution func
 			second: big.NewInt(0),},
 	}
 	
-	for n:=0;n<searchDepthBits;n++ {
+	search: for n:=0;n<searchDepthBits;n++ {
 
 		var newLayer = []pair{};
 
 		fmt.Println(fmt.Sprintf("LAYER %v", n))		
 		
-		for _,p := range layer {
+		for _,pair_ := range layer {
 
 			for i:=0;i<4;i++ {
 				bit1 := i & 1
@@ -288,32 +355,26 @@ func bfs(filter func (first []byte, second []byte) (bool,bool),showSolution func
 			
 				first := new(big.Int).Exp(big.NewInt(2),big.NewInt(int64(n)),nil)
 				first = first.Mul(first,big.NewInt(int64(bit1)))
-				first.Add(first, p.first)
+				first.Add(first, pair_.first)
 
 				second := new(big.Int).Exp(big.NewInt(2),big.NewInt(int64(n)),nil)
 				second = second.Mul(second,big.NewInt(int64(bit2)))
-				second.Add(second, p.second)
+				second.Add(second, pair_.second)
 
-				f := BInt2binArr(first,n+1)
-				s := BInt2binArr(second,n+1)
+				found, isCorrect := filter(p, BInt2binArr(first,n+1), BInt2binArr(second,n+1))
+			
+				if isCorrect {
 
-				if equation_5(f, s) && equation_6(f, s){
+					if found {
+						showSolution(first, second)
+						break search
 					
-					newLayer = append(newLayer, pair {
-						first: first,
-						second: second})
-						
-					//fmt.Println(fmt.Sprintf("%v, %v",bin2str(f),bin2str(s)));
-						
+					} else {
+						newLayer = append(newLayer, pair {
+							first: first,
+							second: second})
+					}
 				}
-				
-
-				found := equation_4(f, s)
-				
-				if found {
-					fmt.Println(fmt.Sprintf("SOLUTION ---------------------------   %v[%b],  %v[%b]",first,first,second,second));
-				}
-
 			} 
 		}
 
@@ -323,37 +384,31 @@ func bfs(filter func (first []byte, second []byte) (bool,bool),showSolution func
 	}
 }
 
-var p *big.Int
+func showSolution(n1 *big.Int, n2 *big.Int) {
+	fmt.Println(fmt.Sprintf("\nSOLUTION:%v,%v",n1,n2));
+}
 
 func main() {
 	var x, _ = new(big.Int).SetString("197", 10) //
 	var y, _ = new(big.Int).SetString("173", 10) //
-	p = big.NewInt(0).Mul(x, y)
+	p := big.NewInt(0).Mul(x, y)
 
-	a := new(big.Int).Set(x).Sub(x,y)
-	a = a.Div(a,big.NewInt(2))
+	m := new(big.Int).Set(x).Add(x,y)
+	m = m.Div(m,big.NewInt(2))
 	
-	b := new(big.Int).Set(x).Add(x,y)
-	b = b.Div(b,big.NewInt(2))
-	
-	d := new(big.Int).Set(b).Sub(b,a)
+	n := new(big.Int).Set(x).Sub(x,y)
+	n = n.Div(n,big.NewInt(2))
 	
 	fmt.Println(fmt.Sprintf("x  :%32b=[%10X]=%v", x,x,x));
 	fmt.Println(fmt.Sprintf("y  :%32b=[%10X]=%v", y,y,y));
 	fmt.Println(fmt.Sprintf("x*y:%32b=[%10X]=%v", p,p,p));
 
-
-	fmt.Println(fmt.Sprintf("a  :%32b=[%10X]=%v", a,a,a));
-	fmt.Println(fmt.Sprintf("b  :%32b=[%10X]=%v", b,b,b));
-	fmt.Println(fmt.Sprintf("d  :%32b=[%10X]=%v", d,d,d));
+	fmt.Println(fmt.Sprintf("m  :%32b=[%10X]=%v", m,m,m));
+	fmt.Println(fmt.Sprintf("n  :%32b=[%10X]=%v", n,n,n));
 	
 	
 	
 	fmt.Println("-----------------------------------");
 	
-	//dfs(isCorrectEquationSystem,showSolution);
-	
-	bfs(isCorrectEquationSystem,showSolution)
-	
-			
+	bfs(p, isCorrectEquationSystem,showSolution)
 }
